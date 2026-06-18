@@ -1,0 +1,31 @@
+/* ============================================================
+   Mi Capital Conecta — SUB-BRAND tokens (ISOLATED)
+   Programa de beneficios ciudadanos · "Tu esfuerzo, tu ganancia"
+   Scoped to .conecta — does NOT override Catamarca Capital root.
+   Palette VERIFIED against official logo pixels + manual RGB/CMYK.
+   ============================================================ */
+
+.conecta {
+  /* ---------- Conecta palette (raw, verified) ---------- */
+  --mcc-azul:    #0F4C94; /* R15 G76 B148 · CMYK 98/73/9/0 — AZUL principal (logo) */
+  --mcc-celeste: #6EC4D8; /* R110 G196 B216 · CMYK 57/2/15/0 — celeste soporte */
+  --mcc-cyan:    #00E6FB; /* lazo "e" del logo — cyan vívido (acento de pantalla) */
+  --mcc-lima:    #B9CE12; /* R185 G206 B18 · CMYK 36/0/98/0 — lima soporte */
+
+  /* darker/lighter steps for UI */
+  --mcc-azul-deep:    #002454; /* navy profundo (Catamarca azul oscuro) */
+  --mcc-celeste-soft: #E6F6FA;
+  --mcc-ink:          #07223F; /* deep blue-black ink */
+
+  /* ---------- Semantic aliases (Conecta only) ---------- */
+  --conecta-primary:      var(--mcc-azul);
+  --conecta-primary-deep: var(--mcc-azul-deep);
+  --conecta-accent:       var(--mcc-cyan);
+  --conecta-highlight:    var(--mcc-lima);
+
+  --conecta-text-strong:  var(--mcc-ink);
+  --conecta-text-on-brand:#FFFFFF;
+  --conecta-surface:      #FFFFFF;
+  --conecta-surface-soft: var(--mcc-celeste-soft);
+  --conecta-surface-brand:var(--mcc-azul);
+}

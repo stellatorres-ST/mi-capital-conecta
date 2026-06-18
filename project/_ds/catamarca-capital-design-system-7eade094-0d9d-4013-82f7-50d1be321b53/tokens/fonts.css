@@ -1,0 +1,96 @@
+/* ============================================================
+   Catamarca Capital — Web fonts
+   Primary: Helvetica Neue LT Std (authorized weights + condensed)
+   Secondary: Krimson Regular (claims / emotional remates)
+   ============================================================ */
+
+/* ---- Helvetica Neue LT Std — normal width ---- */
+@font-face {
+  font-family: "Helvetica Neue LT Std";
+  src: url("../assets/fonts/HelveticaNeueLTStd-Lt.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Helvetica Neue LT Std";
+  src: url("../assets/fonts/HelveticaNeueLTStd-Roman.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Helvetica Neue LT Std";
+  src: url("../assets/fonts/HelveticaNeueLTStd-Md.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Helvetica Neue LT Std";
+  src: url("../assets/fonts/HelveticaNeueLTStd-Bd.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Helvetica Neue LT Std";
+  src: url("../assets/fonts/HelveticaNeueLTStd-Hv.otf") format("opentype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Helvetica Neue LT Std";
+  src: url("../assets/fonts/HelveticaNeueLTStd-Blk.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---- Helvetica Neue LT Std — condensed ----
+   Exposed as its own family so authors opt in explicitly. */
+@font-face {
+  font-family: "Helvetica Neue LT Std Cn";
+  src: url("../assets/fonts/HelveticaNeueLTStd-Cn.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Helvetica Neue LT Std Cn";
+  src: url("../assets/fonts/HelveticaNeueLTStd-MdCn.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Helvetica Neue LT Std Cn";
+  src: url("../assets/fonts/HelveticaNeueLTStd-BdCn.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Helvetica Neue LT Std Cn";
+  src: url("../assets/fonts/HelveticaNeueLTStd-HvCn.otf") format("opentype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Helvetica Neue LT Std Cn";
+  src: url("../assets/fonts/HelveticaNeueLTStd-BlkCn.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: block;
+}
+
+/* ---- Krimson — secondary, for claims & emotional highlights ---- */
+@font-face {
+  font-family: "Krimson";
+  src: url("../assets/fonts/Krimson.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}

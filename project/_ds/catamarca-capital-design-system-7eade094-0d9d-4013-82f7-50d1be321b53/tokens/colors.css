@@ -1,0 +1,80 @@
+/* ============================================================
+   Catamarca Capital — Color tokens
+   Official chromatic palette from the brand manual.
+   Profile: sRGB IEC61966-2.1
+   ============================================================ */
+
+:root {
+  /* ---------- Brand palette (raw) ---------- */
+  /* Greens — the institutional spine */
+  --cc-verde-petroleo: #005151; /* Verde Petróleo — primary brand color */
+  --cc-verde-medio:    #45803B; /* Verde Medio */
+  --cc-verde-lima:     #89AE24; /* Verde Lima */
+  --cc-amarillo-lima:  #CEDD0E; /* Amarillo Lima */
+
+  /* Magentas / pinks — energy + movement */
+  --cc-magenta: #AA0C96; /* Magenta */
+  --cc-fucsia:  #FF00B7; /* Fucsia */
+
+  /* Warm accents */
+  --cc-naranja:  #F0901B; /* Naranja energético (Manual de Marca v1) */
+  --cc-amarillo: #FFB000; /* Amarillo */
+
+  /* Blues — civic / trust */
+  --cc-azul-oscuro:        #002454; /* Azul Oscuro — logo navy */
+  --cc-azul-institucional: #0F4C94; /* Azul Institucional */
+  --cc-celeste:            #45B5DB; /* Celeste */
+
+  /* ---------- Neutrals (brand-tinted) ---------- */
+  --cc-ink:      #0B1A2B; /* near-black, cool navy cast */
+  --cc-graphite: #2C3947;
+  --cc-slate:    #5A6B7B;
+  --cc-mist:     #8FA0AD;
+  --cc-line:     #DCE3E8; /* hairlines / borders */
+  --cc-cloud:    #EDF1F4; /* subtle fills */
+  --cc-paper:    #F6F8FA; /* page background */
+  --cc-white:    #FFFFFF;
+
+  /* ---------- Semantic aliases ---------- */
+  /* Primary = AZUL institucional (la espina de la marca; el logo es navy).
+     El verde es temático (Ambiente), no el color principal. */
+  --color-primary:        var(--cc-azul-institucional);
+  --color-primary-strong: var(--cc-azul-oscuro);
+  --color-primary-soft:   #E1EAF6;
+
+  --color-accent:         var(--cc-fucsia);
+  --color-accent-2:       var(--cc-amarillo-lima);
+  --color-civic:          var(--cc-azul-institucional);
+  --color-civic-deep:     var(--cc-azul-oscuro);
+
+  /* Text */
+  --text-strong:   var(--cc-ink);
+  --text-body:     var(--cc-graphite);
+  --text-muted:    var(--cc-slate);
+  --text-faint:    var(--cc-mist);
+  --text-on-dark:  var(--cc-white);
+  --text-on-brand: var(--cc-white);
+  --text-link:     var(--cc-azul-institucional);
+
+  /* Surfaces */
+  --surface-page:    var(--cc-paper);
+  --surface-card:    var(--cc-white);
+  --surface-sunken:  var(--cc-cloud);
+  --surface-brand:   var(--cc-azul-oscuro);
+  --surface-civic:   var(--cc-azul-oscuro);
+  --surface-inverse: var(--cc-ink);
+
+  /* Lines & borders */
+  --border-subtle: var(--cc-line);
+  --border-strong: var(--cc-slate);
+  --border-brand:  var(--cc-azul-institucional);
+
+  /* Feedback */
+  --color-success: var(--cc-verde-medio);
+  --color-warning: var(--cc-amarillo);
+  --color-danger:  #C8102E;
+  --color-info:    var(--cc-celeste);
+
+  /* Focus ring */
+  --focus-ring: var(--cc-fucsia);
+}
