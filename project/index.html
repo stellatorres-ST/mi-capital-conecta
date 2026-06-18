@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mi Capital Conecta · Catamarca Capital</title>
+  <link rel="stylesheet" href="_ds/catamarca-capital-design-system-7eade094-0d9d-4013-82f7-50d1be321b53/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/catamarca-capital-design-system-7eade094-0d9d-4013-82f7-50d1be321b53/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/catamarca-capital-design-system-7eade094-0d9d-4013-82f7-50d1be321b53/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/catamarca-capital-design-system-7eade094-0d9d-4013-82f7-50d1be321b53/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/catamarca-capital-design-system-7eade094-0d9d-4013-82f7-50d1be321b53/tokens/base.css">
+  <link rel="stylesheet" href="_ds/catamarca-capital-design-system-7eade094-0d9d-4013-82f7-50d1be321b53/tokens/conecta.css">
+  <link rel="stylesheet" href="_ds/catamarca-capital-design-system-7eade094-0d9d-4013-82f7-50d1be321b53/styles.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; }
+    #root { min-height: 100vh; }
+
+    .mcc-link { position: relative; }
+    .mcc-link::after {
+      content: "";
+      position: absolute;
+      left: 0; bottom: -4px;
+      height: 2px; width: 0;
+      background: var(--mcc-cyan);
+      transition: width .2s ease-out;
+    }
+    .mcc-link:hover::after { width: 100%; }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(14px) scale(.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes livePulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(15,176,74,.45); }
+      50%      { box-shadow: 0 0 0 5px rgba(15,176,74,0); }
+    }
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* FAQ accordion */
+    .faq-answer {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows .22s ease-out;
+    }
+    .faq-answer.open {
+      grid-template-rows: 1fr;
+    }
+    .faq-answer > div { overflow: hidden; }
+
+    /* Form inputs */
+    .mcc-input {
+      width: 100%;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      color: #07223F;
+      background: #F8FBFC;
+      border: 1.5px solid #D9E4EA;
+      border-radius: 12px;
+      padding: 13px 15px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .mcc-input:focus { border-color: #0F4C94; background: #fff; }
+    .mcc-input.error { border-color: #E0457B; }
+    .mcc-input[disabled] { opacity: .55; cursor: not-allowed; }
+
+    /* Responsive nav collapse */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-cta { display: none; }
+      .hero-grid { grid-template-columns: 1fr !important; }
+      .hero-photo { display: none; }
+      .stats-grid { grid-template-columns: repeat(2,1fr) !important; }
+      .two-col { grid-template-columns: 1fr !important; }
+      .three-col { grid-template-columns: 1fr !important; }
+      .benefits-grid { grid-template-columns: 1fr !important; }
+    }
+  </style>
+</head>
+<body>
+<div id="root" class="conecta"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+<script>
+(function() {
+  const { useState, useEffect, useRef, useCallback } = React;
+  const e = React.createElement;
+
+  // ── Data ──────────────────────────────────────────────────────────────────
+
+  const RUBROS = {
+    'Electricidad': ['Instalación nueva', 'Reparación / arreglo', 'Tablero eléctrico', 'Iluminación', 'Otro'],
+    'Plomería': ['Pérdidas / filtraciones', 'Destapaciones', 'Instalación de artefactos', 'Cañerías', 'Otro'],
+    'Gas': ['Instalación de gas', 'Reparación', 'Calefón / termotanque', 'Detección de fugas', 'Otro'],
+    'Pintura': ['Interior', 'Exterior / frente', 'Impermeabilización', 'Empapelado', 'Otro'],
+    'Albañilería': ['Construcción', 'Refacción', 'Revoques', 'Colocación de pisos', 'Otro'],
+    'Carpintería': ['Muebles a medida', 'Puertas y ventanas', 'Reparaciones', 'Placards', 'Otro'],
+    'Jardinería': ['Mantenimiento', 'Poda', 'Diseño de jardín', 'Riego', 'Otro'],
+    'Cuidados domiciliarios': ['Cuidado de adultos', 'Cuidado de niños', 'Acompañamiento', 'Otro'],
+    'Otros': ['Cerrajería', 'Aire acondicionado', 'Limpieza', 'Mudanza / fletes', 'Otro'],
+  };
+
+  const ACTIVITIES = [
+    { icon: 'req',   accent: '#0F4C94', text: 'Carlos M. pidió presupuesto de Electricidad',  meta: 'B° Norte · hace instantes' },
+    { icon: 'new',   accent: '#0FB04A', text: 'Se registró un nuevo Plomero verificado',        meta: 'La Chacarita · hace 1 min' },
+    { icon: 'quote', accent: '#00B4CC', text: 'Lucía F. recibió 4 presupuestos',                meta: 'Pintura · hace 2 min' },
+    { icon: 'new',   accent: '#0FB04A', text: 'Se registró un nuevo Gasista matriculado',       meta: 'B° 25 de Mayo · hace 3 min' },
+    { icon: 'req',   accent: '#0F4C94', text: 'Mariana pidió presupuesto de Albañilería',       meta: 'Centro · hace 4 min' },
+    { icon: 'star',  accent: '#F5A623', text: 'José R. calificó un trabajo con ★★★★★',         meta: 'Carpintería · hace 5 min' },
+    { icon: 'req',   accent: '#0F4C94', text: 'Un comercio pidió un Electricista urgente',      meta: 'Av. Belgrano · hace 6 min' },
+  ];
+
+  const ICON_PATHS = {
+    req:   'M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11',
+    new:   'M12 5v14 M5 12h14',
+    quote: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
+    star:  'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
+  };
+
+  const FAQS = [
+    { q: '¿Tiene algún costo registrarse?', a: 'No. Mi Capital Conecta es 100% gratuita tanto para los trabajadores como para los vecinos que buscan servicios.' },
+    { q: '¿Quién puede registrarse como prestador?', a: 'Cualquier trabajador de oficio o prestador de servicios que resida en la Capital catamarqueña y cuente con la documentación requerida.' },
+    { q: '¿Cómo sé que el prestador es confiable?', a: 'Los perfiles son verificados por el municipio. Además, los vecinos pueden dejar calificaciones y reseñas tras contratar cada servicio.' },
+    { q: '¿Qué rubros están disponibles?', a: 'Electricidad, plomería, albañilería, pintura, gas, carpintería, jardinería, cuidados domiciliarios y más.' },
+  ];
+
+  // ── SVG helpers ───────────────────────────────────────────────────────────
+
+  function Icon({ path, size = 24, stroke = 'currentColor', strokeWidth = 2 }) {
+    return e('svg', {
+      width: size, height: size, viewBox: '0 0 24 24',
+      fill: 'none', stroke, strokeWidth, strokeLinecap: 'round', strokeLinejoin: 'round',
+    }, e('path', { d: path }));
+  }
+
+  function IconPoly({ points, size = 24, stroke = 'currentColor', strokeWidth = 2 }) {
+    return e('svg', {
+      width: size, height: size, viewBox: '0 0 24 24',
+      fill: 'none', stroke, strokeWidth, strokeLinecap: 'round', strokeLinejoin: 'round',
+    }, e('polygon', { points }));
+  }
+
+  // ── ActivityToast ─────────────────────────────────────────────────────────
+
+  function ActivityToast() {
+    const [index, setIndex] = useState(0);
+    const [closed, setClosed] = useState(false);
+    const [key, setKey] = useState(0);
+
+    useEffect(() => {
+      const t = setInterval(() => {
+        setIndex(i => (i + 1) % ACTIVITIES.length);
+        setKey(k => k + 1);
+      }, 4500);
+      return () => clearInterval(t);
+    }, []);
+
+    if (closed) return null;
+
+    const act = ACTIVITIES[index];
+    return e('div', {
+      key,
+      style: {
+        position: 'fixed', left: 24, bottom: 24, zIndex: 50,
+        width: 320, maxWidth: 'calc(100vw - 48px)',
+        background: '#fff', border: '1px solid #E2E8EC', borderRadius: 16,
+        boxShadow: '0 14px 38px rgba(0,36,84,.18)', padding: '14px 16px',
+        display: 'flex', alignItems: 'center', gap: 13,
+        animation: 'toastIn .5s cubic-bezier(.22,1.2,.36,1)',
+      },
+    },
+      e('span', {
+        style: {
+          flex: 'none', width: 40, height: 40, borderRadius: 11,
+          background: act.accent + '1A',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        },
+      },
+        e('svg', { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: act.accent, strokeWidth: 2.2, strokeLinecap: 'round', strokeLinejoin: 'round' },
+          e('path', { d: ICON_PATHS[act.icon] }))
+      ),
+      e('div', { style: { flex: 1, minWidth: 0 } },
+        e('div', { style: { fontSize: 13.5, fontWeight: 700, lineHeight: 1.35, color: '#07223F' } }, act.text),
+        e('div', { style: { display: 'flex', alignItems: 'center', gap: 6, marginTop: 3 } },
+          e('span', { style: { width: 7, height: 7, borderRadius: 999, background: '#0FB04A', animation: 'livePulse 1.8s infinite' } }),
+          e('span', { style: { fontSize: 12, color: '#7C93A6' } }, act.meta)
+        )
+      ),
+      e('button', {
+        onClick: () => setClosed(true),
+        'aria-label': 'Cerrar',
+        style: {
+          flex: 'none', width: 24, height: 24, border: 'none', background: 'none',
+          cursor: 'pointer', color: '#9AAFBD', fontSize: 18, lineHeight: 1, padding: 0,
+        },
+      }, '×')
+    );
+  }
+
+  // ── Header ────────────────────────────────────────────────────────────────
+
+  function Header() {
+    return e('header', {
+      style: {
+        position: 'fixed', left: 0, right: 0, top: 0, zIndex: 40,
+        background: 'rgba(255,255,255,.94)', backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid #E2E8EC', boxShadow: '0 6px 24px rgba(0,36,84,.08)',
+      },
+    },
+      e('div', {
+        style: { maxWidth: 1180, margin: '0 auto', padding: '13px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 },
+      },
+        e('img', { src: 'assets/conecta-color.png', alt: 'Mi Capital Conecta', style: { height: 38, width: 'auto', display: 'block' } }),
+        e('nav', { className: 'nav-links', style: { display: 'flex', alignItems: 'center', gap: 30 } },
+          e('a', { href: '#como',         className: 'mcc-link', style: { fontSize: 15, fontWeight: 600, color: '#0F4C94', textDecoration: 'none' } }, 'Cómo funciona'),
+          e('a', { href: '#porque',       className: 'mcc-link', style: { fontSize: 15, fontWeight: 600, color: '#0F4C94', textDecoration: 'none' } }, 'Beneficios'),
+          e('a', { href: '#presupuesto',  className: 'mcc-link', style: { fontSize: 15, fontWeight: 600, color: '#0F4C94', textDecoration: 'none' } }, 'Pedir presupuesto'),
+          e('a', { href: '#faq',          className: 'mcc-link', style: { fontSize: 15, fontWeight: 600, color: '#0F4C94', textDecoration: 'none' } }, 'Preguntas'),
+          e('a', { href: '#contacto',     className: 'mcc-link', style: { fontSize: 15, fontWeight: 600, color: '#0F4C94', textDecoration: 'none' } }, 'Contacto'),
+          e('a', {
+            href: '#presupuesto',
+            style: {
+              fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 14,
+              textTransform: 'uppercase', letterSpacing: '.03em',
+              color: '#fff', background: '#0F4C94', borderRadius: 999,
+              padding: '11px 22px', textDecoration: 'none',
+            },
+          }, 'Pedí tu presupuesto')
+        )
+      )
+    );
+  }
+
+  // ── Hero ──────────────────────────────────────────────────────────────────
+
+  function Hero({ audience, setAudience }) {
+    const isVecino = audience === 'vecino';
+
+    const audienceText = isVecino
+      ? 'Vecinas, vecinos, PyMEs, comercios e instituciones contratan electricistas, gasistas, pintores, plomeros y muchos servicios más, de forma directa, segura y sin comisiones.'
+      : 'Registrate como trabajador o proveedor, aplicá a los pedidos de presupuesto y conseguí tu próximo cliente con una herramienta municipal totalmente gratuita.';
+
+    const audienceCta = isVecino ? 'Pedí tu presupuesto' : 'Quiero registrarme';
+    const audienceHint = isVecino
+      ? 'Pedí presupuesto y recibí varias propuestas para comparar.'
+      : 'Registrate gratis y aplicá a los pedidos de tu zona.';
+
+    function TabBtn({ label, active, onClick }) {
+      return e('button', {
+        onClick,
+        style: {
+          fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 14,
+          textTransform: 'uppercase', letterSpacing: '.02em', cursor: 'pointer',
+          border: 'none', borderRadius: 999, padding: '11px 22px',
+          transition: 'all .18s ease-out',
+          background: active ? '#0F4C94' : 'transparent',
+          color: active ? '#fff' : '#0F4C94',
+        },
+      }, label);
+    }
+
+    return e('section', {
+      id: 'top',
+      style: {
+        position: 'relative',
+        background: 'linear-gradient(160deg,#E6F6FA 0%,#F4FBFD 55%,#ffffff 100%)',
+        overflow: 'hidden', paddingTop: 78,
+      },
+    },
+      // Decorative blobs
+      e('div', { style: { position: 'absolute', right: -120, top: -80, width: 520, height: 520, borderRadius: '50%', background: 'radial-gradient(circle at 30% 30%,rgba(0,230,251,.22),rgba(0,230,251,0) 70%)' } }),
+      e('div', { style: { position: 'absolute', left: -60, bottom: -120, width: 360, height: 360, borderRadius: '50%', background: 'radial-gradient(circle at 50% 50%,rgba(185,206,18,.16),rgba(185,206,18,0) 70%)' } }),
+
+      e('div', {
+        className: 'hero-grid',
+        style: { position: 'relative', maxWidth: 1180, margin: '0 auto', padding: '0 32px 88px', display: 'grid', gridTemplateColumns: '1.05fr .95fr', gap: 56, alignItems: 'center' },
+      },
+        // Left column
+        e('div', null,
+          // Live badge
+          e('div', {
+            style: { display: 'inline-flex', alignItems: 'center', gap: 9, background: '#fff', border: '1px solid #CDE9F0', borderRadius: 999, padding: '7px 16px', marginBottom: 24 },
+          },
+            e('span', { style: { width: 9, height: 9, borderRadius: 999, background: '#0FB04A', boxShadow: '0 0 0 4px rgba(15,176,74,.16)' } }),
+            e('span', { style: { fontSize: 13, fontWeight: 700, letterSpacing: '.02em', color: '#0F4C94' } }, 'Plataforma de oficios y servicios · 100% gratuita')
+          ),
+
+          // H1
+          e('h1', {
+            style: { fontFamily: 'var(--font-condensed)', fontWeight: 900, textTransform: 'uppercase', lineHeight: .92, letterSpacing: '-.01em', fontSize: 72, color: '#002454', margin: '0 0 18px' },
+          },
+            'Conectamos lo que necesitás con quien ',
+            e('span', { style: { color: '#0F4C94', position: 'relative' } },
+              'resuelve',
+              e('svg', { viewBox: '0 0 220 24', style: { position: 'absolute', left: 0, bottom: -12, width: '100%', height: 18 }, preserveAspectRatio: 'none' },
+                e('path', { d: 'M4 16 C 60 4, 160 4, 216 14', fill: 'none', stroke: '#00E6FB', strokeWidth: 6, strokeLinecap: 'round' })
+              )
+            )
+          ),
+
+          e('p', { style: { fontSize: 19, lineHeight: 1.55, color: '#33536E', maxWidth: 520, margin: '18px 0 14px' } }, audienceText),
+          e('p', { style: { fontFamily: 'var(--font-claim)', fontSize: 30, color: '#0F4C94', margin: '0 0 30px' } }, 'Tu esfuerzo, tu ganancia.'),
+
+          // Audience toggle
+          e('div', { style: { marginBottom: 24 } },
+            e('div', { style: { fontFamily: 'var(--font-heading)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.06em', fontSize: 13, color: '#7C93A6', marginBottom: 10 } }, 'Empezá según quién sos'),
+            e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'center' } },
+              e('div', { style: { display: 'inline-flex', background: '#fff', border: '1px solid #CDE9F0', borderRadius: 999, padding: 5, gap: 4 } },
+                e(TabBtn, { label: 'Soy vecino/a',     active: isVecino,  onClick: () => setAudience('vecino') }),
+                e(TabBtn, { label: 'Soy trabajador/a', active: !isVecino, onClick: () => setAudience('trabajador') })
+              ),
+              e('span', { style: { fontSize: 14, lineHeight: 1.4, color: '#5A7286', maxWidth: 240 } }, audienceHint)
+            )
+          ),
+
+          // CTAs
+          e('div', { style: { display: 'flex', gap: 14, flexWrap: 'nowrap', alignItems: 'stretch' } },
+            e('a', {
+              href: '#presupuesto',
+              style: { display: 'inline-flex', alignItems: 'center', gap: 10, fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 16, textTransform: 'uppercase', letterSpacing: '.03em', color: '#002454', background: '#00E6FB', borderRadius: 999, padding: '16px 30px', textDecoration: 'none', boxShadow: '0 8px 22px rgba(0,230,251,.35)' },
+            }, audienceCta, e('span', { style: { fontSize: 19 } }, '→')),
+            e('a', {
+              href: '#como',
+              style: { display: 'inline-flex', alignItems: 'center', fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 16, textTransform: 'uppercase', letterSpacing: '.03em', color: '#0F4C94', background: '#fff', border: '2px solid #CDE9F0', borderRadius: 999, padding: '14px 28px', textDecoration: 'none' },
+            }, 'Ver cómo funciona')
+          ),
+
+          // Trust row
+          e('div', { style: { display: 'flex', alignItems: 'center', gap: 14, marginTop: 26 } },
+            e('div', { style: { display: 'flex' } },
+              e('span', { style: { width: 38, height: 38, borderRadius: '50%', background: '#0F4C94', color: '#fff', fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #fff' } }, 'JR'),
+              e('span', { style: { width: 38, height: 38, borderRadius: '50%', background: '#6EC4D8', color: '#002454', fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #fff', marginLeft: -12 } }, 'MS'),
+              e('span', { style: { width: 38, height: 38, borderRadius: '50%', background: '#B9CE12', color: '#002454', fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #fff', marginLeft: -12 } }, 'LF')
+            ),
+            e('div', { style: { fontSize: 14, lineHeight: 1.35, color: '#5A7286' } },
+              e('span', { style: { color: '#F5A623', letterSpacing: 1 } }, '★★★★★'),
+              e('br'),
+              e('strong', { style: { color: '#07223F' } }, '+1.200 vecinos y trabajadores'),
+              ' ya usan Mi Capital Conecta'
+            )
+          )
+        ),
+
+        // Right column — photo + floating cards
+        e('div', { className: 'hero-photo', style: { position: 'relative', width: 461, height: 561 } },
+          e('img', {
+            src: isVecino ? 'assets/hero-chica.png' : 'assets/hero-trabajador-foto.jpg',
+            alt: isVecino ? 'Vecina usando Mi Capital Conecta' : 'Trabajador realizando un oficio',
+            style: {
+              display: 'block', width: '100%', height: 540,
+              objectFit: 'cover', objectPosition: isVecino ? '50% 15%' : '50% 35%',
+              borderRadius: 24, boxShadow: '0 24px 60px rgba(0,36,84,.18)',
+              background: 'linear-gradient(150deg,#0F4C94,#002454)',
+            },
+          }),
+
+          // Chip card
+          e('div', {
+            style: { position: 'absolute', left: -26, bottom: 30, background: '#fff', border: '1px solid #E2E8EC', borderRadius: 16, boxShadow: '0 16px 36px rgba(0,36,84,.18)', padding: '13px 16px', display: 'flex', alignItems: 'center', gap: 13 },
+          },
+            e('span', {
+              style: { width: 44, height: 44, borderRadius: '50%', background: isVecino ? '#0F4C94' : '#B9CE12', color: isVecino ? '#fff' : '#002454', fontFamily: 'var(--font-heading)', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 },
+            }, isVecino ? 'MR' : 'E'),
+            e('div', null,
+              e('div', { style: { fontWeight: 800, fontSize: 15, color: '#07223F' } }, isVecino ? 'Miguel R. · Electricista' : 'Nuevo pedido · Electricidad'),
+              e('div', { style: { fontSize: 13, color: '#7C93A6' } }, isVecino ? '★ 4.9 · 132 trabajos · Verificado' : 'A 1,2 km de vos · hace 5 min')
+            )
+          ),
+
+          // $0 badge
+          e('div', {
+            style: { position: 'absolute', top: -18, right: -18, background: '#B9CE12', color: '#002454', borderRadius: 16, padding: '14px 18px', boxShadow: '0 14px 30px rgba(0,36,84,.2)' },
+          },
+            e('div', { style: { fontFamily: 'var(--font-heading)', fontWeight: 900, fontSize: 22, lineHeight: 1 } }, '$0'),
+            e('div', { style: { fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.03em' } }, 'Sin comisiones')
+          )
+        )
+      )
+    );
+  }
+
+  // ── Stats strip ───────────────────────────────────────────────────────────
+
+  function StatsStrip() {
+    const stats = [
+      { val: '+1.200', label: 'Trabajadores verificados' },
+      { val: '+ de 250', label: 'Rubros disponibles' },
+      { val: '24 hs', label: 'Para recibir presupuestos' },
+      { val: '0%', label: 'Comisión e intermediarios' },
+    ];
+    return e('section', { style: { background: '#002454' } },
+      e('div', {
+        className: 'stats-grid',
+        style: { maxWidth: 1180, margin: '0 auto', padding: '26px 32px', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 24 },
+      },
+        stats.map((s, i) => e('div', { key: i, style: { textAlign: 'center' } },
+          e('div', { style: { fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 38, color: '#00E6FB', lineHeight: 1 } }, s.val),
+          e('div', { style: { fontSize: 13, fontWeight: 700, color: '#A9C3DE', marginTop: 4 } }, s.label)
+        ))
+      )
+    );
+  }
+
+  // ── Two audiences ─────────────────────────────────────────────────────────
+
+  function TwoAudiences() {
+    return e('section', { style: { maxWidth: 1180, margin: '0 auto', padding: '84px 32px 30px' } },
+      e('div', {
+        className: 'two-col',
+        style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 26 },
+      },
+        e('div', { style: { background: 'linear-gradient(165deg,#F4FBFD,#E6F6FA)', border: '1px solid #D5ECF2', borderRadius: 22, padding: 38 } },
+          e('span', { style: { display: 'inline-flex', width: 54, height: 54, borderRadius: 14, background: '#0F4C94', alignItems: 'center', justifyContent: 'center', marginBottom: 18 } },
+            e('svg', { width: 28, height: 28, viewBox: '0 0 24 24', fill: 'none', stroke: '#fff', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' },
+              e('path', { d: 'M3 21h18M5 21V7l8-4v18M19 21V11l-6-4' }),
+              e('path', { d: 'M9 9v.01M9 12v.01M9 15v.01M9 18v.01' })
+            )
+          ),
+          e('h3', { style: { fontFamily: 'var(--font-condensed)', fontWeight: 800, textTransform: 'uppercase', fontSize: 30, color: '#002454', margin: '0 0 10px' } }, 'Vecinas y vecinos'),
+          e('p', { style: { fontSize: 16, lineHeight: 1.55, color: '#33536E', margin: '0 0 22px' } }, 'Comercios, PyMEs, instituciones y familias contratan electricistas, gasistas, pintores, plomeros y más, de forma directa, segura y sin comisiones.'),
+          e('a', { href: '#presupuesto', style: { display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-heading)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.03em', fontSize: 15, color: '#fff', background: '#0F4C94', borderRadius: 999, padding: '14px 26px', textDecoration: 'none' } }, 'Pedí tu presupuesto →')
+        ),
+        e('div', { style: { background: '#fff', border: '1px solid #E2E8EC', borderRadius: 22, padding: 38, boxShadow: '0 8px 24px rgba(0,36,84,.06)' } },
+          e('span', { style: { display: 'inline-flex', width: 54, height: 54, borderRadius: 14, background: '#00E6FB', alignItems: 'center', justifyContent: 'center', marginBottom: 18 } },
+            e('svg', { width: 28, height: 28, viewBox: '0 0 24 24', fill: 'none', stroke: '#002454', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' },
+              e('path', { d: 'M14.7 6.3a4 4 0 0 1-5.66 5.66l-5.34 5.34a2 2 0 1 0 2.83 2.83l5.34-5.34a4 4 0 0 0 5.66-5.66l-2.12 2.12-2.12-2.12 2.12-2.12z' })
+            )
+          ),
+          e('h3', { style: { fontFamily: 'var(--font-condensed)', fontWeight: 800, textTransform: 'uppercase', fontSize: 30, color: '#002454', margin: '0 0 10px' } }, 'Trabajadores/as'),
+          e('p', { style: { fontSize: 16, lineHeight: 1.55, color: '#33536E', margin: '0 0 22px' } }, 'Registrate como prestador, aplicá a los pedidos de presupuesto y conseguí tu próximo cliente con una herramienta municipal gratuita.'),
+          e('a', { href: '#presupuesto', style: { display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-heading)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.03em', fontSize: 15, color: '#002454', background: '#B9CE12', borderRadius: 999, padding: '14px 26px', textDecoration: 'none' } }, 'Acceder y registrarme →')
+        )
+      )
+    );
+  }
+
+  // ── How it works ──────────────────────────────────────────────────────────
+
+  function HowItWorks() {
+    const steps = [
+      {
+        num: '1', topColor: '#0F4C94',
+        iconPath: 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z',
+        title: 'Pedí presupuesto',
+        desc: 'Tu solicitud llega automáticamente a todos los trabajadores y prestadores registrados en la plataforma.',
+      },
+      {
+        num: '2', topColor: '#00E6FB',
+        iconPath: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z',
+        title: 'Recibí varios presupuestos',
+        desc: 'Todos los trabajadores validados presupuestan el trabajo y vos elegís al que prefieras comparando precio y reseñas.',
+      },
+      {
+        num: '3', topColor: '#B9CE12',
+        iconPoly: '12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2',
+        title: 'Contratá y calificá',
+        desc: 'Cuando estés seguro, contratá a quien prefieras y, una vez realizado el trabajo, dejá tu calificación.',
+      },
+    ];
+
+    return e('section', { id: 'como', style: { maxWidth: 1180, margin: '0 auto', padding: '70px 32px' } },
+      e('div', { style: { textAlign: 'center', marginBottom: 48 } },
+        e('span', { style: { fontFamily: 'var(--font-heading)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', fontSize: 14, color: '#00B4CC' } }, 'Simple y rápido'),
+        e('h2', { style: { fontFamily: 'var(--font-condensed)', fontWeight: 900, textTransform: 'uppercase', fontSize: 50, color: '#002454', margin: '8px 0 0', lineHeight: .95 } }, '¿Cómo funciona?')
+      ),
+      e('div', {
+        className: 'three-col',
+        style: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 26 },
+      },
+        steps.map((s, i) => e('div', {
+          key: i,
+          style: { position: 'relative', background: '#fff', border: '1px solid #E2E8EC', borderTop: `4px solid ${s.topColor}`, borderRadius: 18, padding: '32px 28px' },
+        },
+          e('div', { style: { fontFamily: 'var(--font-condensed)', fontWeight: 900, fontSize: 64, color: '#E6F6FA', lineHeight: .8, position: 'absolute', top: 18, right: 24 } }, s.num),
+          e('span', { style: { display: 'inline-flex', width: 50, height: 50, borderRadius: 13, background: '#E6F6FA', alignItems: 'center', justifyContent: 'center', marginBottom: 18 } },
+            s.iconPoly
+              ? e('svg', { width: 26, height: 26, viewBox: '0 0 24 24', fill: 'none', stroke: '#0F4C94', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }, e('polygon', { points: s.iconPoly }))
+              : e('svg', { width: 26, height: 26, viewBox: '0 0 24 24', fill: 'none', stroke: '#0F4C94', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }, e('path', { d: s.iconPath }))
+          ),
+          e('h3', { style: { fontFamily: 'var(--font-condensed)', fontWeight: 800, textTransform: 'uppercase', fontSize: 23, color: '#002454', margin: '0 0 8px' } }, s.title),
+          e('p', { style: { fontSize: 15, lineHeight: 1.55, color: '#5A7286', margin: 0 } }, s.desc)
+        ))
+      )
+    );
+  }
+
+  // ── Benefits ──────────────────────────────────────────────────────────────
+
+  function Benefits() {
+    const items = [
+      { iconPath: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M9 12l2 2 4-4', title: 'Ahorro de tiempo', desc: 'Hacé una solicitud y recibí múltiples presupuestos para comparar, sin perder tiempo buscando.' },
+      { iconPath: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M9 12l2 2 4-4', title: 'Trabajadores validados', desc: 'Cada registro pasa por revisión de documentación, experiencia y datos personales por el municipio.' },
+      { iconPath: 'M12 1v22 M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6', title: 'Sin comisiones', desc: '100% gratuita para vecinos y trabajadores. Sin intermediarios ni costos ocultos.' },
+      { iconPath: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75', title: 'Trabajo local', desc: 'Acompañás e incluís en el mercado formal a trabajadores de oficios vecinos de la Capital.' },
+    ];
+
+    return e('section', { id: 'porque', style: { background: '#F4FBFD', borderTop: '1px solid #E2EEF2', borderBottom: '1px solid #E2EEF2' } },
+      e('div', { style: { maxWidth: 1180, margin: '0 auto', padding: '72px 32px' } },
+        e('div', {
+          className: 'two-col',
+          style: { display: 'grid', gridTemplateColumns: '.85fr 1.15fr', gap: 48, alignItems: 'start' },
+        },
+          e('div', null,
+            e('span', { style: { fontFamily: 'var(--font-heading)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', fontSize: 14, color: '#00B4CC' } }, 'Por qué Conecta'),
+            e('h2', { style: { fontFamily: 'var(--font-condensed)', fontWeight: 900, textTransform: 'uppercase', fontSize: 50, color: '#002454', margin: '8px 0 16px', lineHeight: .95 } }, 'Una ciudad que trabaja con vos'),
+            e('p', { style: { fontSize: 17, lineHeight: 1.6, color: '#33536E', margin: '0 0 24px' } }, 'Una herramienta gratuita que acompaña a vecinos y trabajadores de oficios, fortaleciendo el trabajo local y formal de la Capital.'),
+            e('p', { style: { fontFamily: 'var(--font-claim)', fontSize: 26, color: '#0F4C94', margin: 0 } }, 'La ciudad va con vos.')
+          ),
+          e('div', {
+            className: 'benefits-grid',
+            style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 },
+          },
+            items.map((item, i) => e('div', { key: i, style: { background: '#fff', border: '1px solid #E2E8EC', borderRadius: 16, padding: 24 } },
+              e('span', { style: { display: 'inline-flex', width: 44, height: 44, borderRadius: 11, background: '#E6F6FA', alignItems: 'center', justifyContent: 'center', marginBottom: 14 } },
+                e('svg', { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: '#0F4C94', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' },
+                  e('path', { d: item.iconPath }))
+              ),
+              e('h4', { style: { fontWeight: 800, fontSize: 17, color: '#07223F', margin: '0 0 6px' } }, item.title),
+              e('p', { style: { fontSize: 14, lineHeight: 1.5, color: '#5A7286', margin: 0 } }, item.desc)
+            ))
+          )
+        )
+      )
+    );
+  }
+
+  // ── Testimonials ──────────────────────────────────────────────────────────
+
+  function Testimonials() {
+    const cards = [
+      { stars: '★★★★★', starColor: '#F5A623', quote: '"Pedí un electricista un domingo y el lunes ya tenía tres presupuestos. Elegí por las reseñas y quedó impecable."', initials: 'SG', avatarBg: '#0F4C94', avatarColor: '#fff', name: 'Sofía G.', sub: 'Vecina · B° 25 de Mayo', dark: false },
+      { stars: '★★★★★', starColor: '#B9CE12', quote: '"Desde que me registré como gasista no paré de conseguir trabajos en mi zona. Y sin pagar ninguna comisión."', initials: 'DA', avatarBg: '#00E6FB', avatarColor: '#002454', name: 'Daniel A.', sub: 'Gasista matriculado', dark: true },
+      { stars: '★★★★★', starColor: '#F5A623', quote: '"Para el comercio necesitábamos un pintor urgente. En pocas horas teníamos varias opciones para comparar."', initials: 'DP', avatarBg: '#6EC4D8', avatarColor: '#002454', name: 'Comercio Don Pepe', sub: 'PyME · Centro', dark: false },
+    ];
+
+    return e('section', { style: { maxWidth: 1180, margin: '0 auto', padding: '78px 32px 24px' } },
+      e('div', { style: { textAlign: 'center', marginBottom: 46 } },
+        e('span', { style: { fontFamily: 'var(--font-heading)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', fontSize: 14, color: '#00B4CC' } }, 'Lo que dice la gente'),
+        e('h2', { style: { fontFamily: 'var(--font-condensed)', fontWeight: 900, textTransform: 'uppercase', fontSize: 50, color: '#002454', margin: '8px 0 0', lineHeight: .95 } }, 'Vecinos y trabajadores que ya conectaron')
+      ),
+      e('div', {
+        className: 'three-col',
+        style: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 24 },
+      },
+        cards.map((c, i) => e('div', {
+          key: i,
+          style: {
+            background: c.dark ? '#002454' : '#fff',
+            border: c.dark ? 'none' : '1px solid #E2E8EC',
+            borderRadius: 18, padding: 30,
+            boxShadow: c.dark ? '0 12px 30px rgba(0,36,84,.18)' : '0 8px 24px rgba(0,36,84,.06)',
+            display: 'flex', flexDirection: 'column',
+          },
+        },
+          e('div', { style: { color: c.starColor, fontSize: 18, letterSpacing: 2, marginBottom: 14 } }, c.stars),
+          e('p', { style: { fontSize: 16, lineHeight: 1.6, color: c.dark ? '#DCEAF6' : '#33536E', margin: '0 0 22px', flex: 1 } }, c.quote),
+          e('div', { style: { display: 'flex', alignItems: 'center', gap: 13 } },
+            e('span', { style: { width: 46, height: 46, borderRadius: '50%', background: c.avatarBg, color: c.avatarColor, fontFamily: 'var(--font-heading)', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 } }, c.initials),
+            e('div', null,
+              e('div', { style: { fontWeight: 800, fontSize: 15, color: c.dark ? '#fff' : '#07223F' } }, c.name),
+              e('div', { style: { fontSize: 13, color: c.dark ? '#8FB3D6' : '#7C93A6' } }, c.sub)
+            )
+          )
+        ))
+      )
+    );
+  }
+
+  // ── Budget Form ───────────────────────────────────────────────────────────
+
+  function BudgetForm() {
+    const [form, setForm] = useState({ rubro: '', categoria: '', desc: '', fotos: [] });
+    const [errors, setErrors] = useState({});
+    const [sent, setSent] = useState(false);
+
+    function setField(k, v) {
+      setForm(f => {
+        const next = { ...f, [k]: v };
+        if (k === 'rubro') next.categoria = '';
+        return next;
+      });
+      setErrors(e => ({ ...e, [k]: undefined }));
+    }
+
+    function addFotos(fileList) {
+      const files = Array.from(fileList || []).slice(0, 5 - form.fotos.length);
+      Promise.all(files.map(f => new Promise(res => {
+        const r = new FileReader();
+        r.onload = () => res({ name: f.name, url: r.result });
+        r.readAsDataURL(f);
+      }))).then(imgs => setForm(f => ({ ...f, fotos: [...f.fotos, ...imgs] })));
+    }
+
+    function removeFoto(i) {
+      setForm(f => ({ ...f, fotos: f.fotos.filter((_, j) => j !== i) }));
+    }
+
+    function submit() {
+      const errs = {};
+      if (!form.rubro) errs.rubro = 'Elegí un rubro.';
+      if (!form.categoria) errs.categoria = 'Elegí una categoría.';
+      if (form.desc.trim().length < 10) errs.desc = 'Contanos un poco más (mín. 10 caracteres).';
+      if (Object.keys(errs).length) { setErrors(errs); return; }
+      setSent(true);
+    }
+
+    function renderField(label, name, type) {
+      const err = errors[name];
+      if (name === 'rubro') {
+        return e('div', { key: name, style: { marginBottom: 16 } },
+          e('label', { style: { display: 'block', fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.03em', color: '#5A7286', marginBottom: 7 } }, label),
+          e('select', { value: form.rubro, onChange: ev => setField('rubro', ev.target.value), className: 'mcc-input' + (err ? ' error' : '') },
+            e('option', { value: '' }, 'Seleccioná un rubro…'),
+            Object.keys(RUBROS).map(o => e('option', { key: o, value: o }, o))
+          ),
+          err && e('div', { style: { fontSize: 13, color: '#E0457B', marginTop: 6, fontWeight: 600 } }, err)
+        );
+      }
+      if (name === 'categoria') {
+        const opts = RUBROS[form.rubro] || [];
+        return e('div', { key: name, style: { marginBottom: 16 } },
+          e('label', { style: { display: 'block', fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.03em', color: '#5A7286', marginBottom: 7 } }, label),
+          e('select', { value: form.categoria, onChange: ev => setField('categoria', ev.target.value), disabled: !form.rubro, className: 'mcc-input' + (err ? ' error' : '') },
+            e('option', { value: '' }, form.rubro ? 'Seleccioná una categoría…' : 'Elegí primero un rubro'),
+            opts.map(o => e('option', { key: o, value: o }, o))
+          ),
+          err && e('div', { style: { fontSize: 13, color: '#E0457B', marginTop: 6, fontWeight: 600 } }, err)
+        );
+      }
+      return e('div', { key: name, style: { marginBottom: 16 } },
+        e('label', { style: { display: 'block', fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.03em', color: '#5A7286', marginBottom: 7 } }, label),
+        e('textarea', { value: form[name], onChange: ev => setField(name, ev.target.value), rows: 4, placeholder: 'Contanos qué necesitás. Ej: Necesito instalar 4 tomas y revisar el tablero del living.', className: 'mcc-input' + (err ? ' error' : ''), style: { resize: 'vertical', minHeight: 104 } }),
+        err && e('div', { style: { fontSize: 13, color: '#E0457B', marginTop: 6, fontWeight: 600 } }, err)
+      );
+    }
+
+    if (sent) {
+      return e('div', { style: { textAlign: 'center', padding: '14px 6px' } },
+        e('div', { style: { width: 70, height: 70, borderRadius: 999, background: '#E5F7EC', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' } },
+          e('span', { style: { fontSize: 34, color: '#0FB04A' } }, '✓')
+        ),
+        e('h3', { style: { fontFamily: 'var(--font-condensed)', fontWeight: 800, textTransform: 'uppercase', fontSize: 28, color: '#002454', margin: '0 0 10px' } }, '¡Pedido enviado!'),
+        e('p', { style: { fontSize: 16, lineHeight: 1.55, color: '#5A7286', margin: '0 0 8px' } },
+          'Tu pedido de ' + (form.rubro || 'servicio') + (form.categoria ? ' · ' + form.categoria : '') + ' ya llegó a los prestadores de tu zona.'
+        ),
+        e('p', { style: { fontFamily: 'var(--font-claim)', fontSize: 22, color: '#0F4C94', margin: '0 0 24px' } }, 'Tu esfuerzo, tu ganancia.'),
+        e('button', {
+          onClick: () => { setSent(false); setForm({ rubro: '', categoria: '', desc: '', fotos: [] }); setErrors({}); },
+          style: { fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 15, textTransform: 'uppercase', letterSpacing: '.03em', color: '#0F4C94', background: '#fff', border: '2px solid #CDE9F0', borderRadius: 999, padding: '13px 26px', cursor: 'pointer' },
+        }, 'Hacer otro pedido')
+      );
+    }
+
+    return e('div', null,
+      e('h3', { style: { fontFamily: 'var(--font-condensed)', fontWeight: 800, textTransform: 'uppercase', fontSize: 24, color: '#002454', margin: '0 0 4px' } }, '¿Qué servicio necesitás?'),
+      e('p', { style: { fontSize: 14, color: '#7C93A6', margin: '0 0 22px' } }, 'Creá tu pedido y recibí presupuestos de profesionales. Gratis.'),
+      renderField('Rubro', 'rubro'),
+      renderField('Categoría', 'categoria'),
+      renderField('Descripción del trabajo a realizar', 'desc', 'textarea'),
+
+      // Photo upload
+      e('div', { style: { marginBottom: 18 } },
+        e('label', { style: { display: 'block', fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.03em', color: '#5A7286', marginBottom: 7 } }, 'Agregá fotos del trabajo'),
+        e('p', { style: { fontSize: 13, lineHeight: 1.45, color: '#9AAFBD', margin: '0 0 12px' } }, 'Es importante que subas fotos del lugar o artefacto a reparar para que sea más fácil presupuestar.'),
+        e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 10 } },
+          form.fotos.map((ph, i) => e('div', { key: i, style: { position: 'relative', width: 72, height: 72, borderRadius: 12, overflow: 'hidden', border: '1px solid #D9E4EA' } },
+            e('img', { src: ph.url, alt: ph.name, style: { width: '100%', height: '100%', objectFit: 'cover' } }),
+            e('button', {
+              onClick: () => removeFoto(i),
+              'aria-label': 'Quitar',
+              style: { position: 'absolute', top: 3, right: 3, width: 20, height: 20, borderRadius: 999, border: 'none', background: 'rgba(0,36,84,.78)', color: '#fff', fontSize: 13, lineHeight: 1, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 },
+            }, '×')
+          )),
+          form.fotos.length < 5 && e('label', {
+            style: { width: 72, height: 72, borderRadius: 12, border: '1.5px dashed #B7CCDA', background: '#F8FBFC', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, cursor: 'pointer', color: '#0F4C94' },
+          },
+            e('svg', { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: '#0F4C94', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' },
+              e('path', { d: 'M12 5v14M5 12h14' })
+            ),
+            e('span', { style: { fontSize: 10, fontWeight: 700 } }, 'Imagen'),
+            e('input', { type: 'file', accept: 'image/*', multiple: true, style: { display: 'none' }, onChange: ev => { addFotos(ev.target.files); ev.target.value = ''; } })
+          )
+        )
+      ),
+
+      e('button', {
+        onClick: submit,
+        style: { width: '100%', marginTop: 6, fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 16, textTransform: 'uppercase', letterSpacing: '.03em', color: '#002454', background: '#00E6FB', border: 'none', borderRadius: 999, padding: 16, cursor: 'pointer', boxShadow: '0 8px 20px rgba(0,230,251,.32)' },
+      }, 'Siguiente →'),
+      e('p', { style: { fontSize: 12, color: '#9AAFBD', textAlign: 'center', margin: '14px 0 0' } }, 'Al continuar aceptás ser contactado por prestadores verificados.')
+    );
+  }
+
+  // ── Presupuesto section ───────────────────────────────────────────────────
+
+  function PresupuestoSection() {
+    const tags = ['Electricidad','Plomería','Gas','Pintura','Albañilería','Carpintería','Jardinería','otros'];
+    return e('section', { id: 'presupuesto', style: { maxWidth: 1180, margin: '0 auto', padding: '80px 32px' } },
+      e('div', {
+        className: 'two-col',
+        style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'start' },
+      },
+        e('div', null,
+          e('span', { style: { fontFamily: 'var(--font-heading)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', fontSize: 14, color: '#00B4CC' } }, 'Pedí tu presupuesto'),
+          e('h2', { style: { fontFamily: 'var(--font-condensed)', fontWeight: 900, textTransform: 'uppercase', fontSize: 48, color: '#002454', margin: '8px 0 16px', lineHeight: .95 } }, 'Contanos qué necesitás'),
+          e('p', { style: { fontSize: 16, lineHeight: 1.6, color: '#33536E', margin: '0 0 26px', maxWidth: 430 } }, 'Completá el pedido y llegará a todos los prestadores del rubro. En menos de 24 horas vas a empezar a recibir propuestas.'),
+          e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 10 } },
+            tags.map((t, i) => e('span', { key: i, style: { fontSize: 14, fontWeight: 700, color: '#0F4C94', background: '#E6F6FA', border: '1px solid #D5ECF2', borderRadius: 999, padding: '9px 16px' } }, t))
+          )
+        ),
+        e('div', { style: { background: '#fff', border: '1px solid #E2E8EC', borderRadius: 22, boxShadow: '0 18px 50px rgba(0,36,84,.10)', padding: 34 } },
+          e(BudgetForm)
+        )
+      )
+    );
+  }
+
+  // ── FAQ ───────────────────────────────────────────────────────────────────
+
+  function FAQ() {
+    const [open, setOpen] = useState(-1);
+    const toggle = i => setOpen(o => o === i ? -1 : i);
+
+    return e('section', { id: 'faq', style: { background: '#F4FBFD', borderTop: '1px solid #E2EEF2' } },
+      e('div', { style: { maxWidth: 820, margin: '0 auto', padding: '72px 32px' } },
+        e('div', { style: { textAlign: 'center', marginBottom: 40 } },
+          e('span', { style: { fontFamily: 'var(--font-heading)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', fontSize: 14, color: '#00B4CC' } }, 'Dudas frecuentes'),
+          e('h2', { style: { fontFamily: 'var(--font-condensed)', fontWeight: 900, textTransform: 'uppercase', fontSize: 48, color: '#002454', margin: '8px 0 0', lineHeight: .95 } }, 'Preguntas frecuentes')
+        ),
+        e('div', { style: { display: 'flex', flexDirection: 'column', gap: 14 } },
+          FAQS.map((faq, i) => {
+            const isOpen = open === i;
+            return e('div', {
+              key: i,
+              style: { background: '#fff', border: `1px solid ${isOpen ? '#CDE9F0' : '#E2E8EC'}`, borderRadius: 16, overflow: 'hidden', boxShadow: isOpen ? '0 10px 26px rgba(0,36,84,.08)' : 'none', transition: 'all .18s ease-out' },
+            },
+              e('button', {
+                onClick: () => toggle(i),
+                style: { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, background: 'none', border: 'none', cursor: 'pointer', padding: '22px 26px', textAlign: 'left' },
+              },
+                e('span', { style: { fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 18, color: '#002454' } }, faq.q),
+                e('span', {
+                  style: {
+                    flex: 'none', width: 30, height: 30, borderRadius: 999,
+                    background: isOpen ? '#00E6FB' : '#E6F6FA',
+                    color: isOpen ? '#002454' : '#0F4C94',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 22, fontWeight: 400, lineHeight: 1,
+                    transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)',
+                    transition: 'transform .2s ease-out, background .18s',
+                  },
+                }, '+')
+              ),
+              e('div', { className: `faq-answer${isOpen ? ' open' : ''}` },
+                e('div', null,
+                  e('p', { style: { fontSize: 15, lineHeight: 1.6, color: '#5A7286', margin: 0, padding: '0 26px 24px' } }, faq.a)
+                )
+              )
+            );
+          })
+        )
+      )
+    );
+  }
+
+  // ── CTA Band ─────────────────────────────────────────────────────────────
+
+  function CTABand() {
+    return e('section', { style: { position: 'relative', background: 'linear-gradient(135deg,#002454 0%,#0F4C94 100%)', overflow: 'hidden' } },
+      e('div', { style: { position: 'absolute', right: -90, top: -70, width: 340, height: 340, borderRadius: '50%', background: 'radial-gradient(circle,rgba(0,230,251,.26),transparent 70%)' } }),
+      e('div', { style: { position: 'absolute', left: -90, bottom: -70, width: 340, height: 340, borderRadius: '50%', background: 'radial-gradient(circle,rgba(185,206,18,.18),transparent 70%)' } }),
+      e('div', { style: { position: 'relative', maxWidth: 760, margin: '0 auto', padding: '74px 32px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' } },
+        e('h2', { style: { fontFamily: 'var(--font-condensed)', fontWeight: 900, textTransform: 'uppercase', fontSize: 54, color: '#fff', margin: '0 0 12px', lineHeight: .95 } }, '¿Sos vecino o trabajador?'),
+        e('p', { style: { fontSize: 19, color: '#BBD4EC', margin: '0 0 6px' } }, 'Entrá a Mi Capital Conecta y empezá hoy. Es gratis.'),
+        e('p', { style: { fontFamily: 'var(--font-claim)', fontSize: 28, color: '#00E6FB', margin: '0 0 30px' } }, 'Tu esfuerzo, tu ganancia.'),
+        e('a', {
+          href: '#presupuesto',
+          style: { display: 'inline-flex', alignItems: 'center', gap: 10, fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 17, textTransform: 'uppercase', letterSpacing: '.03em', color: '#002454', background: '#00E6FB', borderRadius: 999, padding: '18px 38px', textDecoration: 'none', boxShadow: '0 12px 30px rgba(0,230,251,.3)' },
+        }, 'Ir a la plataforma →')
+      )
+    );
+  }
+
+  // ── Contact Form ──────────────────────────────────────────────────────────
+
+  function ContactForm() {
+    const [contact, setContact] = useState({ nombre: '', email: '', mensaje: '' });
+    const [errors, setErrors] = useState({});
+    const [sent, setSent] = useState(false);
+
+    function setField(k, v) {
+      setContact(c => ({ ...c, [k]: v }));
+      setErrors(e => ({ ...e, [k]: undefined }));
+    }
+
+    function submit() {
+      const errs = {};
+      if (!contact.nombre.trim()) errs.nombre = 'Ingresá tu nombre.';
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(contact.email.trim())) errs.email = 'Ingresá un email válido.';
+      if (contact.mensaje.trim().length < 10) errs.mensaje = 'Contanos un poco más (mín. 10 caracteres).';
+      if (Object.keys(errs).length) { setErrors(errs); return; }
+      setSent(true);
+    }
+
+    function renderField(label, name, type) {
+      const err = errors[name];
+      const cls = 'mcc-input' + (err ? ' error' : '');
+      return e('div', { key: name, style: { marginBottom: 15 } },
+        e('label', { style: { display: 'block', fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.03em', color: '#5A7286', marginBottom: 7 } }, label),
+        type === 'textarea'
+          ? e('textarea', { className: cls, value: contact[name], onChange: ev => setField(name, ev.target.value), rows: 4, placeholder: 'Escribí tu consulta…', style: { resize: 'vertical', minHeight: 100 } })
+          : e('input', { className: cls, type: type || 'text', value: contact[name], onChange: ev => setField(name, ev.target.value), placeholder: name === 'email' ? 'tu@email.com' : 'Tu nombre' }),
+        err && e('div', { style: { fontSize: 13, color: '#E0457B', marginTop: 6, fontWeight: 600 } }, err)
+      );
+    }
+
+    if (sent) {
+      return e('div', { style: { textAlign: 'center', padding: '14px 6px' } },
+        e('div', { style: { width: 64, height: 64, borderRadius: 999, background: '#E5F7EC', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px' } },
+          e('span', { style: { fontSize: 30, color: '#0FB04A' } }, '✓')
+        ),
+        e('h3', { style: { fontFamily: 'var(--font-condensed)', fontWeight: 800, textTransform: 'uppercase', fontSize: 24, color: '#002454', margin: '0 0 8px' } }, '¡Consulta enviada!'),
+        e('p', { style: { fontSize: 15, lineHeight: 1.55, color: '#5A7286', margin: '0 0 22px' } }, 'Gracias por escribirnos. Te vamos a responder al correo que nos dejaste.'),
+        e('button', {
+          onClick: () => { setSent(false); setContact({ nombre: '', email: '', mensaje: '' }); setErrors({}); },
+          style: { fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 14, textTransform: 'uppercase', letterSpacing: '.03em', color: '#0F4C94', background: '#fff', border: '2px solid #CDE9F0', borderRadius: 999, padding: '12px 24px', cursor: 'pointer' },
+        }, 'Enviar otra consulta')
+      );
+    }
+
+    return e('div', null,
+      e('h3', { style: { fontFamily: 'var(--font-condensed)', fontWeight: 800, textTransform: 'uppercase', fontSize: 23, color: '#002454', margin: '0 0 4px' } }, 'Formulario de consulta'),
+      e('p', { style: { fontSize: 14, color: '#7C93A6', margin: '0 0 20px' } }, 'Dejanos tu mensaje y te respondemos.'),
+      renderField('Nombre y apellido', 'nombre', 'text'),
+      renderField('Email', 'email', 'email'),
+      renderField('Tu consulta', 'mensaje', 'textarea'),
+      e('button', {
+        onClick: submit,
+        style: { width: '100%', marginTop: 4, fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 15, textTransform: 'uppercase', letterSpacing: '.03em', color: '#002454', background: '#00E6FB', border: 'none', borderRadius: 999, padding: 15, cursor: 'pointer', boxShadow: '0 8px 20px rgba(0,230,251,.3)' },
+      }, 'Enviar consulta →')
+    );
+  }
+
+  // ── Footer ────────────────────────────────────────────────────────────────
+
+  function Footer() {
+    const socials = [
+      { label: 'Instagram', href: 'https://www.instagram.com/', icon: e('svg', { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: '#fff', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' }, e('rect', { x: 2, y: 2, width: 20, height: 20, rx: 5 }), e('circle', { cx: 12, cy: 12, r: 4 }), e('line', { x1: 17.5, y1: 6.5, x2: 17.5, y2: 6.5 })) },
+      { label: 'Facebook', href: 'https://www.facebook.com/', icon: e('svg', { width: 20, height: 20, viewBox: '0 0 24 24', fill: '#fff' }, e('path', { d: 'M14 9h3V6h-3c-2.2 0-4 1.8-4 4v2H7v3h3v6h3v-6h2.5l.5-3H13v-2c0-.6.4-1 1-1z' })) },
+      { label: 'X', href: 'https://twitter.com/', icon: e('svg', { width: 18, height: 18, viewBox: '0 0 24 24', fill: '#fff' }, e('path', { d: 'M18.2 2.5h3.3l-7.2 8.3 8.5 11.2h-6.6l-5.2-6.8-6 6.8H1.4l7.7-8.8L1 2.5h6.8l4.7 6.2 5.7-6.2zm-1.2 17.7h1.8L7.1 4.3H5.2l11.8 15.9z' })) },
+      { label: 'YouTube', href: 'https://www.youtube.com/', icon: e('svg', { width: 20, height: 20, viewBox: '0 0 24 24', fill: '#fff' }, e('path', { d: 'M23 12s0-3.2-.4-4.7c-.2-.8-.9-1.5-1.7-1.7C19.4 5.2 12 5.2 12 5.2s-7.4 0-8.9.4c-.8.2-1.5.9-1.7 1.7C1 8.8 1 12 1 12s0 3.2.4 4.7c.2.8.9 1.5 1.7 1.7 1.5.4 8.9.4 8.9.4s7.4 0 8.9-.4c.8-.2 1.5-.9 1.7-1.7.4-1.5.4-4.7.4-4.7zM9.8 15.3V8.7l6 3.3-6 3.3z' })) },
+    ];
+
+    return e('footer', { id: 'contacto', style: { background: '#002454', padding: '64px 32px 30px' } },
+      e('div', { style: { maxWidth: 1180, margin: '0 auto' } },
+        e('div', {
+          className: 'two-col',
+          style: { display: 'grid', gridTemplateColumns: '1.05fr .95fr', gap: 48, alignItems: 'start' },
+        },
+          // Left column
+          e('div', null,
+            e('img', { src: 'assets/conecta-blanco.png', alt: 'Mi Capital Conecta', style: { height: 46, width: 'auto', display: 'block', marginBottom: 20 } }),
+            e('p', { style: { fontSize: 16, lineHeight: 1.6, color: '#A9C3DE', maxWidth: 420, margin: '0 0 26px' } }, '¿Tenés una consulta sobre la plataforma o querés sumarte como prestador? Escribinos y te respondemos a la brevedad.'),
+
+            // WhatsApp button
+            e('a', {
+              href: 'https://wa.me/5493834000000?text=Hola,%20quiero%20más%20información%20sobre%20Mi%20Capital%20Conecta',
+              target: '_blank', rel: 'noopener',
+              style: { display: 'inline-flex', alignItems: 'center', gap: 12, fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 16, textTransform: 'uppercase', letterSpacing: '.03em', color: '#002454', background: '#25D366', borderRadius: 999, padding: '14px 26px', textDecoration: 'none', boxShadow: '0 10px 24px rgba(37,211,102,.32)', marginBottom: 28 },
+            },
+              e('svg', { width: 22, height: 22, viewBox: '0 0 24 24', fill: '#002454' },
+                e('path', { d: 'M17.5 14.4c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51l-.57-.01c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.7.62.71.23 1.36.2 1.87.12.57-.08 1.77-.72 2.02-1.42.25-.7.25-1.29.17-1.42-.07-.13-.27-.2-.57-.35zM12.05 21.7h-.01a9.6 9.6 0 0 1-4.9-1.34l-.35-.21-3.64.96.97-3.55-.23-.36a9.62 9.62 0 0 1 14.94-11.9 9.56 9.56 0 0 1 2.82 6.8c0 5.3-4.32 9.6-9.62 9.6zM20.5 3.5A11.6 11.6 0 0 0 2.05 17.45L.5 23.5l6.2-1.63a11.55 11.55 0 0 0 5.35 1.36h.01c6.38 0 11.57-5.19 11.58-11.57a11.5 11.5 0 0 0-3.14-8.16z' })
+              ),
+              'Escribinos por WhatsApp'
+            ),
+
+            // Social links
+            e('div', { style: { display: 'flex', alignItems: 'center', gap: 14 } },
+              e('span', { style: { fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.04em', color: '#7C9BBE' } }, 'Seguinos'),
+              e('div', { style: { display: 'flex', gap: 10 } },
+                socials.map((s, i) => e('a', {
+                  key: i, href: s.href, target: '_blank', rel: 'noopener', 'aria-label': s.label,
+                  style: { width: 42, height: 42, borderRadius: 12, background: 'rgba(255,255,255,.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' },
+                }, s.icon))
+              )
+            )
+          ),
+
+          // Right column — contact form
+          e('div', { style: { background: '#fff', borderRadius: 22, boxShadow: '0 18px 50px rgba(0,0,0,.22)', padding: 32 } },
+            e(ContactForm)
+          )
+        ),
+
+        // Brand bar
+        e('div', { style: { marginTop: 48, borderTop: '1px solid rgba(255,255,255,.12)', paddingTop: 26, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' } },
+          e('div', { style: { display: 'flex', alignItems: 'center', gap: 22 } },
+            e('img', { src: 'assets/conecta-blanco.png', alt: 'Mi Capital Conecta', style: { height: 40, width: 'auto' } }),
+            e('div', { style: { width: 1, height: 36, background: 'rgba(255,255,255,.18)' } }),
+            e('img', { src: 'assets/catamarca-capital-blanco.png', alt: 'Catamarca Capital', style: { height: 40, width: 'auto' } })
+          ),
+          e('div', { style: { fontSize: 13, lineHeight: 1.5, color: '#7C9BBE', textAlign: 'right' } },
+            'Programa municipal · Secretaría de Turismo y Desarrollo Económico',
+            e('br'),
+            'Municipalidad de San Fernando del Valle de Catamarca'
+          )
+        )
+      )
+    );
+  }
+
+  // ── App ───────────────────────────────────────────────────────────────────
+
+  function App() {
+    const [audience, setAudience] = useState('vecino');
+
+    return e('div', { className: 'conecta', style: { background: '#fff', minHeight: '100vh', fontFamily: 'var(--font-sans)', color: '#07223F', overflowX: 'hidden' } },
+      e(Header),
+      e('div', { style: { paddingTop: 64 } },  // offset for fixed header
+        e(Hero, { audience, setAudience }),
+        e(StatsStrip),
+        e(TwoAudiences),
+        e(HowItWorks),
+        e(Benefits),
+        e(Testimonials),
+        e(PresupuestoSection),
+        e(FAQ),
+        e(CTABand),
+        e(Footer),
+      ),
+      // Back to top button
+      e('a', {
+        href: '#top',
+        'aria-label': 'Volver arriba',
+        style: { position: 'fixed', left: 24, bottom: 90, zIndex: 41, width: 52, height: 52, borderRadius: 999, background: '#00E6FB', color: '#002454', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', boxShadow: '0 8px 22px rgba(0,230,251,.45)', border: '2px solid #fff' },
+      },
+        e('svg', { width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none', stroke: '#002454', strokeWidth: 2.4, strokeLinecap: 'round', strokeLinejoin: 'round' },
+          e('polyline', { points: '18 15 12 9 6 15' })
+        )
+      ),
+      e(ActivityToast)
+    );
+  }
+
+  // Boot
+  ReactDOM.createRoot(document.getElementById('root')).render(e(App));
+})();
+</script>
+</body>
+</html>
