@@ -74,8 +74,8 @@
       body, #root { overflow-x: hidden; }
 
       /* Nav */
-      .nav-desktop-cta { display: none !important; }
-      .nav-hamburger   { display: block !important; }
+      .nav-desktop  { display: none !important; }
+      .nav-hamburger { display: block !important; }
 
       /* Hero */
       .hero-grid {
@@ -266,13 +266,15 @@
       e('div', { style: { maxWidth: 1180, margin: '0 auto', padding: '13px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
         e('img', { src: 'assets/conecta-color.png', alt: 'Mi Capital Conecta', style: { height: 38, width: 'auto', display: 'block' } }),
 
-        // Desktop: solo CTA
-        e('a', {
-          href: 'https://catamarca.qxm.com.ar/pedido/nuevo',
-          target: '_blank', rel: 'noopener',
-          className: 'nav-desktop-cta',
-          style: { fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 14, textTransform: 'uppercase', letterSpacing: '.03em', color: '#fff', background: '#0F4C94', borderRadius: 999, padding: '12px 26px', textDecoration: 'none' },
-        }, 'Pedí tu presupuesto'),
+        // Desktop: links + CTA
+        e('nav', { className: 'nav-desktop', style: { display: 'flex', alignItems: 'center', gap: 30 } },
+          NAV.map((n, i) => e('a', { key: i, href: n.href, className: 'mcc-link', style: { fontSize: 15, fontWeight: 600, color: '#0F4C94', textDecoration: 'none' } }, n.label)),
+          e('a', {
+            href: 'https://catamarca.qxm.com.ar/pedido/nuevo',
+            target: '_blank', rel: 'noopener',
+            style: { fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 14, textTransform: 'uppercase', letterSpacing: '.03em', color: '#fff', background: '#0F4C94', borderRadius: 999, padding: '12px 26px', textDecoration: 'none' },
+          }, 'Pedí tu presupuesto')
+        ),
 
         // Mobile: hamburguesa
         e('button', {
