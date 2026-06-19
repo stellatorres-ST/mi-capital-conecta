@@ -69,56 +69,56 @@
     .mcc-input.error { border-color: #E0457B; }
     .mcc-input[disabled] { opacity: .55; cursor: not-allowed; }
 
-    /* Responsive nav collapse */
+    /* ── Mobile ──────────────────────────────────────────── */
     @media (max-width: 768px) {
-      .nav-links { display: none; }
-      .nav-cta  { display: none; }
+      body, #root { overflow-x: hidden; }
+
+      /* Nav */
+      .nav-links      { display: none; }
+      .nav-cta        { display: none; }
       .nav-mobile-cta { display: inline-flex !important; }
 
       /* Hero */
       .hero-grid {
         grid-template-columns: 1fr !important;
-        padding-left: 18px !important;
-        padding-right: 18px !important;
-        padding-bottom: 52px !important;
+        padding: 0 16px 44px !important;
         gap: 0 !important;
       }
-      .hero-photo { display: none; }
-      .hero-h1   { font-size: 2.15rem !important; line-height: 1.05 !important; }
+      .hero-photo   { display: none; }
+      .hero-h1      { font-size: 2rem !important; line-height: 1.08 !important; }
+      .hero-claim   { display: none !important; }
+      .hero-trust   { display: none !important; }
+      .hero-ctas    { flex-direction: column !important; gap: 10px !important; }
+      .hero-ctas a  { width: 100% !important; justify-content: center !important; }
 
       /* Stats */
       .stats-grid {
         grid-template-columns: repeat(2,1fr) !important;
-        padding-left: 18px !important;
-        padding-right: 18px !important;
+        padding: 20px 16px !important;
+        gap: 14px !important;
       }
-      .stat-val { font-size: 1.85rem !important; }
+      .stat-val { font-size: 1.75rem !important; }
 
-      /* Grid layouts */
-      .two-col       { grid-template-columns: 1fr !important; }
-      .three-col     { grid-template-columns: 1fr !important; }
-      .benefits-grid { grid-template-columns: 1fr !important; }
+      /* Grids → single column */
+      .two-col       { grid-template-columns: 1fr !important; gap: 16px !important; }
+      .three-col     { grid-template-columns: 1fr !important; gap: 14px !important; }
+      .benefits-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
 
-      /* Section horizontal padding */
+      /* Section padding */
       .sec-inner {
-        padding-left: 18px !important;
-        padding-right: 18px !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        padding-top: 44px !important;
+        padding-bottom: 44px !important;
       }
 
       /* Typography */
-      .sec-h2 { font-size: 1.85rem !important; }
-      .sec-h3 { font-size: 1.3rem !important; }
+      .sec-h2 { font-size: 1.75rem !important; }
 
-      /* Toast */
-      .toast-el {
-        right: 10px !important;
-        left: 10px !important;
-        width: auto !important;
-        max-width: none !important;
-        bottom: 76px !important;
-      }
+      /* Toast — escondido en mobile para no tapar contenido */
+      .toast-el { display: none !important; }
 
-      /* Back-to-top: right side, above toast */
+      /* Back-to-top — derecha abajo */
       .back-to-top {
         right: 16px !important;
         left: auto !important;
@@ -358,7 +358,7 @@
           ),
 
           e('p', { style: { fontSize: 19, lineHeight: 1.55, color: '#33536E', maxWidth: 520, margin: '18px 0 14px' } }, audienceText),
-          e('p', { style: { fontFamily: 'var(--font-claim)', fontSize: 30, color: '#0F4C94', margin: '0 0 30px' } }, 'Tu esfuerzo, tu ganancia.'),
+          e('p', { className: 'hero-claim', style: { fontFamily: 'var(--font-claim)', fontSize: 30, color: '#0F4C94', margin: '0 0 30px' } }, 'Tu esfuerzo, tu ganancia.'),
 
           // Audience toggle
           e('div', { style: { marginBottom: 24 } },
@@ -373,7 +373,7 @@
           ),
 
           // CTAs
-          e('div', { style: { display: 'flex', gap: 14, flexWrap: 'nowrap', alignItems: 'stretch' } },
+          e('div', { className: 'hero-ctas', style: { display: 'flex', gap: 14, flexWrap: 'nowrap', alignItems: 'stretch' } },
             e('a', {
               href: isVecino ? 'https://catamarca.qxm.com.ar/pedido/nuevo' : 'https://catamarca.qxm.com.ar/registro/trabajadores/legales',
               target: '_blank', rel: 'noopener',
@@ -386,7 +386,7 @@
           ),
 
           // Trust row
-          e('div', { style: { display: 'flex', alignItems: 'center', gap: 14, marginTop: 26 } },
+          e('div', { className: 'hero-trust', style: { display: 'flex', alignItems: 'center', gap: 14, marginTop: 26 } },
             e('div', { style: { display: 'flex' } },
               e('span', { style: { width: 38, height: 38, borderRadius: '50%', background: '#0F4C94', color: '#fff', fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #fff' } }, 'JR'),
               e('span', { style: { width: 38, height: 38, borderRadius: '50%', background: '#6EC4D8', color: '#002454', fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #fff', marginLeft: -12 } }, 'MS'),
