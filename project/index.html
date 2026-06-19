@@ -254,11 +254,10 @@
     const [open, setOpen] = useState(false);
     const close = () => setOpen(false);
     const NAV = [
-      { href: '#como',        label: 'Cómo funciona' },
-      { href: '#porque',      label: 'Beneficios' },
-      { href: '#presupuesto', label: 'Pedir presupuesto' },
-      { href: '#faq',         label: 'Preguntas frecuentes' },
-      { href: '#contacto',    label: 'Contacto' },
+      { href: '#como',     label: 'Cómo funciona' },
+      { href: '#porque',   label: 'Beneficios' },
+      { href: '#faq',      label: 'Preguntas frecuentes' },
+      { href: '#contacto', label: 'Contacto' },
     ];
     return e('header', {
       style: { position: 'fixed', left: 0, right: 0, top: 0, zIndex: 40, background: 'rgba(255,255,255,.97)', backdropFilter: 'blur(12px)', borderBottom: '1px solid #E2E8EC', boxShadow: '0 6px 24px rgba(0,36,84,.08)' },
