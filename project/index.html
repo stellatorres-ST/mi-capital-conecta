@@ -322,7 +322,8 @@
           // CTAs
           e('div', { style: { display: 'flex', gap: 14, flexWrap: 'nowrap', alignItems: 'stretch' } },
             e('a', {
-              href: '#presupuesto',
+              href: isVecino ? 'https://catamarca.qxm.com.ar/pedido/nuevo' : 'https://catamarca.qxm.com.ar/registro/trabajadores/legales',
+              target: '_blank', rel: 'noopener',
               style: { display: 'inline-flex', alignItems: 'center', gap: 10, fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 16, textTransform: 'uppercase', letterSpacing: '.03em', color: '#002454', background: '#00E6FB', borderRadius: 999, padding: '16px 30px', textDecoration: 'none', boxShadow: '0 8px 22px rgba(0,230,251,.35)' },
             }, audienceCta, e('span', { style: { fontSize: 19 } }, '→')),
             e('a', {
@@ -424,7 +425,7 @@
           ),
           e('h3', { style: { fontFamily: 'var(--font-condensed)', fontWeight: 800, textTransform: 'uppercase', fontSize: 30, color: '#002454', margin: '0 0 10px' } }, 'Vecinas y vecinos'),
           e('p', { style: { fontSize: 16, lineHeight: 1.55, color: '#33536E', margin: '0 0 22px' } }, 'Comercios, PyMEs, instituciones y familias contratan electricistas, gasistas, pintores, plomeros y más, de forma directa, segura y sin comisiones.'),
-          e('a', { href: '#presupuesto', style: { display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-heading)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.03em', fontSize: 15, color: '#fff', background: '#0F4C94', borderRadius: 999, padding: '14px 26px', textDecoration: 'none' } }, 'Pedí tu presupuesto →')
+          e('a', { href: 'https://catamarca.qxm.com.ar/pedido/nuevo', target: '_blank', rel: 'noopener', style: { display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-heading)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.03em', fontSize: 15, color: '#fff', background: '#0F4C94', borderRadius: 999, padding: '14px 26px', textDecoration: 'none' } }, 'Pedí tu presupuesto →')
         ),
         e('div', { style: { background: '#fff', border: '1px solid #E2E8EC', borderRadius: 22, padding: 38, boxShadow: '0 8px 24px rgba(0,36,84,.06)' } },
           e('span', { style: { display: 'inline-flex', width: 54, height: 54, borderRadius: 14, background: '#00E6FB', alignItems: 'center', justifyContent: 'center', marginBottom: 18 } },
@@ -434,7 +435,7 @@
           ),
           e('h3', { style: { fontFamily: 'var(--font-condensed)', fontWeight: 800, textTransform: 'uppercase', fontSize: 30, color: '#002454', margin: '0 0 10px' } }, 'Trabajadores/as'),
           e('p', { style: { fontSize: 16, lineHeight: 1.55, color: '#33536E', margin: '0 0 22px' } }, 'Registrate como prestador, aplicá a los pedidos de presupuesto y conseguí tu próximo cliente con una herramienta municipal gratuita.'),
-          e('a', { href: '#presupuesto', style: { display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-heading)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.03em', fontSize: 15, color: '#002454', background: '#B9CE12', borderRadius: 999, padding: '14px 26px', textDecoration: 'none' } }, 'Acceder y registrarme →')
+          e('a', { href: 'https://catamarca.qxm.com.ar/registro/trabajadores/legales', target: '_blank', rel: 'noopener', style: { display: 'inline-flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-heading)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.03em', fontSize: 15, color: '#002454', background: '#B9CE12', borderRadius: 999, padding: '14px 26px', textDecoration: 'none' } }, 'Acceder y registrarme →')
         )
       )
     );
@@ -780,7 +781,8 @@
         e('p', { style: { fontSize: 19, color: '#BBD4EC', margin: '0 0 6px' } }, 'Entrá a Mi Capital Conecta y empezá hoy. Es gratis.'),
         e('p', { style: { fontFamily: 'var(--font-claim)', fontSize: 28, color: '#00E6FB', margin: '0 0 30px' } }, 'Tu esfuerzo, tu ganancia.'),
         e('a', {
-          href: '#presupuesto',
+          href: 'https://catamarca.qxm.com.ar/pedido/nuevo',
+          target: '_blank', rel: 'noopener',
           style: { display: 'inline-flex', alignItems: 'center', gap: 10, fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: 17, textTransform: 'uppercase', letterSpacing: '.03em', color: '#002454', background: '#00E6FB', borderRadius: 999, padding: '18px 38px', textDecoration: 'none', boxShadow: '0 12px 30px rgba(0,230,251,.3)' },
         }, 'Ir a la plataforma →')
       )
